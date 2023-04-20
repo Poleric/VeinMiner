@@ -33,8 +33,45 @@ namespace VeinMiner
                     var result = tsp.GetData<VMStatus>("VeinMiner");
                     if (args.Parameters.Count >= 1)
                     {
-                        result.EnableBroadcast = !result.EnableBroadcast;
-                        tsp.SendMessage($"[c/95CFA6:<VeinMiner> Mining Status {(result.EnableBroadcast ? "Activated" : "Deactivated")}.]", Color.White);
+                        if (args.Parameters[0] == "msg")
+                        {
+                            result.EnableBroadcast = !result.EnableBroadcast;
+                            tsp.SendMessage($"[c/95CFA6:<VeinMiner> Mining Status {(result.EnableBroadcast ? "Activated" : "Deactivated")}.]", Color.White);
+                        }
+                        else if (args.Parameters[0] == "add")
+                        {
+                            IEnumerable<string> tileIDs = args.Parameters.Skip(1);
+                            foreach (string tileID in tileIDs)
+                            {
+                                int id = int.Parse(tileID);
+                                if (!Config.Tile.Contains(id))
+                                {
+                                    Config.AddTile(id);
+                                    tsp.SendMessage($"[c/95CFA6:<VeinMiner> Added Tile {id}.]", Color.White);
+                                }
+                                else
+                                {
+                                    tsp.SendMessage($"Tile {id} is already in the list.", Color.Red);
+                                }
+                            }
+                        }
+                        else if (args.Parameters[0] == "remove" || args.Parameters[0] == "rm")
+                        {
+                            IEnumerable<string> tileIDs = args.Parameters.Skip(1);
+                            foreach (string tileID in tileIDs)
+                            {
+                                int id = int.Parse(tileID);
+                                if (!Config.Tile.Contains(id))
+                                {
+                                    tsp.SendMessage($"Tile {id} is not in the list", Color.Red);
+                                }
+                                else
+                                {
+                                    Config.RemoveTile(id);
+                                    tsp.SendMessage($"[c/95CFA6:<VeinMiner> Removed Tile {id}.]", Color.White);
+                                }
+                            }
+                        }
                     }
                     else
                     {
@@ -154,7 +191,7 @@ namespace VeinMiner
             {
                 if (!list.Any(p => p.Equals(new Point(x, y))) && Main.tile[x, y] is { } tile && tile.active() && tile.type == type)
                 {
-                    if (list.Count > 5000) return list;
+                    if (list.Count >= Config.MaxVeinSize) return list;
                     list.Add(new(x, y));
                     list = GetVein(list, x + 1, y, type).Result;
                     list = GetVein(list, x - 1, y, type).Result;

@@ -34,9 +34,24 @@ namespace VeinMiner
             }
             catch (Exception ex) { TShock.Log.Error(ex.Message); TShock.Log.ConsoleError("<VeinMiner> Failed to read config file."); }
         }
+        public void AddTile(int tileID)
+        {
+            Tile.Add(tileID);
+            Write();
+        }
+        public void RemoveTile(int tileID)
+        {
+            Tile.Remove(tileID);
+            Write();
+        }
+        private void Write()
+        {
+            File.WriteAllText(Path.Combine(TShock.SavePath, "VeinMiner.json"), JsonConvert.SerializeObject(this, Formatting.Indented));
+        }
         public bool Enable { get; set; } = true;
         public bool Broadcast { get; set; } = true;
         public bool PutInInventory { get; set; } = true;
+        public int MaxVeinSize { get; set; } = 300;
         public List<int> Tile { get; set; } = new();
         public List<Exchange> Exchange { get; set; } = new();
     }
